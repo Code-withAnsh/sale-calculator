@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-key="appTitle">Stationery Shop Manager</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base Light Mode Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for better mobile scrolling */
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        #app-container {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 768px; /* Max width for tablets/desktops */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .header-container {
+            position: relative; /* For absolute positioning of language selector */
+            background-color: #4f46e5; /* Indigo-600 */
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .language-selector-container {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 20;
+        }
+        .language-selector {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            background-color: white;
+            font-size: 0.875rem;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .dark-mode-toggle-container {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 20;
+        }
+        .dark-mode-toggle {
+            background-color: white;
+            color: #4f46e5;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            font-size: 0.875rem;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 1rem 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            text-align: center;
+            color: #6b7280;
+            background-color: #f3f4f6; /* Gray-100 */
+        }
+        .tab-button.active {
+            border-color: #4f46e5;
+            color: #4f46e5;
+            background-color: #eef2ff; /* Indigo-50 */
+        }
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+        .submit-button, .action-button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+            margin-bottom: 0.5rem; /* For multiple buttons */
+        }
+        .submit-button:hover, .action-button:hover {
+            background-color: #4338ca;
+            transform: translateY(-1px);
+        }
+        .submit-button:active, .action-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(79, 70, 229, 0.3);
+        }
+        .action-button.edit {
+            background-color: #22c55e; /* Green-500 */
+            box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+        }
+        .action-button.edit:hover {
+            background-color: #16a34a; /* Green-600 */
+        }
+        .action-button.delete {
+            background-color: #ef4444; /* Red-500 */
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+        }
+        .action-button.delete:hover {
+            background-color: #dc2626; /* Red-600 */
+        }
+        .action-button.cancel {
+            background-color: #6b7280; /* Gray-500 */
+            box-shadow: 0 4px 10px rgba(107, 114, 128, 0.3);
+        }
+        .action-button.cancel:hover {
+            background-color: #4b5563; /* Gray-600 */
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+        .history-table th, .history-table td {
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            text-align: left;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .history-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+            position: sticky; /* Sticky header for scrolling tables */
+            top: 0;
+            z-index: 10;
+        }
+        .history-table tbody tr:nth-child(even) {
+            background-color: #f3f4f6;
+        }
+        .history-table tbody tr:hover {
+            background-color: #eef2ff;
+        }
+        .table-container {
+            max-height: 400px; /* Max height for scrollable tables */
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+            transition: border-color 0.3s ease;
+        }
+        .message-box {
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none; /* Hidden by default */
+            font-weight: 500;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .message-box.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #4f46e5;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- Dark Mode Styles --- */
+        body.dark-mode {
+            background-color: #1a202c; /* Darker background */
+            color: #e2e8f0; /* Light text */
+        }
+        body.dark-mode #app-container {
+            background-color: #2d3748; /* Darker container */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        body.dark-mode .header-container {
+            background-color: #4a5568; /* Darker indigo for header */
+        }
+        body.dark-mode .language-selector,
+        body.dark-mode .dark-mode-toggle {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #4a5568;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        body.dark-mode .tab-button {
+            background-color: #2d3748;
+            color: #cbd5e0;
+        }
+        body.dark-mode .tab-button.active {
+            border-color: #667eea; /* Lighter indigo for active tab */
+            color: #667eea;
+            background-color: #4a5568;
+        }
+        body.dark-mode .tab-content h2 {
+            color: #e2e8f0;
+        }
+        body.dark-mode .form-group label {
+            color: #cbd5e0;
+        }
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #4a5568;
+        }
+        body.dark-mode .form-group input:focus,
+        body.dark-mode .form-group select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.4);
+        }
+        body.dark-mode .history-table th {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #4a5568;
+        }
+        body.dark-mode .history-table td {
+            border-color: #4a5568;
+        }
+        body.dark-mode .history-table tbody tr {
+            background-color: #2d3748;
+        }
+        body.dark-mode .history-table tbody tr:nth-child(even) {
+            background-color: #4a5568;
+        }
+        body.dark-mode .history-table tbody tr:hover {
+            background-color: #667eea;
+        }
+        body.dark-mode .table-container {
+            border-color: #4a5568;
+        }
+        body.dark-mode .message-box {
+            background-color: #38a169; /* Darker green for success */
+            color: #e6fffa;
+        }
+        body.dark-mode .message-box.error {
+            background-color: #e53e3e; /* Darker red for error */
+            color: #fed7d7;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div class="header-container rounded-t-xl">
+            <h1 class="text-3xl font-bold text-center py-6" data-key="mainHeading">Stationery Shop Manager</h1>
+            <div class="language-selector-container">
+                <select id="languageSelector" class="language-selector">
+                    <option value="en">English</option>
+                    <option value="hi">हिन्दी</option>
+                </select>
+            </div>
+            <div class="dark-mode-toggle-container">
+                <button id="darkModeToggle" class="dark-mode-toggle" data-key="darkModeToggle">Dark Mode</button>
+            </div>
+        </div>
+
+        <div class="flex border-b border-gray-200">
+            <button id="purchaseTab" class="tab-button active" data-key="purchaseTab">Purchase Entry</button>
+            <button id="saleTab" class="tab-button" data-key="saleTab">Sale Entry</button>
+        </div>
+
+        <!-- Purchase Entry Section -->
+        <div id="purchaseContent" class="tab-content active">
+            <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800" data-key="newPurchaseHeading">New Purchase</h2>
+            <div id="purchaseMessage" class="message-box"></div>
+            <form id="purchaseForm" class="bg-white p-6 rounded-lg shadow-sm">
+                <div class="form-group">
+                    <label for="productName" data-key="productNameLabel">Product Name:</label>
+                    <input type="text" id="productName" placeholder="e.g., Pen" required class="capitalize">
+                </div>
+                <div class="form-group">
+                    <label for="purchasePrice" data-key="purchasePriceLabel">Purchase Price (per unit):</label>
+                    <input type="number" id="purchasePrice" step="0.01" min="0" placeholder="e.g., 5.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="purchaseQuantity" data-key="quantityLabel">Quantity:</label>
+                    <input type="number" id="purchaseQuantity" min="1" placeholder="e.g., 100" required>
+                </div>
+                <div class="form-group">
+                    <label for="purchaseDate" data-key="purchaseDateLabel">Purchase Date:</label>
+                    <input type="date" id="purchaseDate" required>
+                </div>
+                <button type="submit" id="addPurchaseButton" class="submit-button" data-key="addPurchaseButton">Add Purchase</button>
+                <button type="button" id="updatePurchaseButton" class="action-button edit hidden" data-key="saveChangesButton">Save Changes</button>
+                <button type="button" id="cancelEditButton" class="action-button cancel hidden" data-key="cancelEditButton">Cancel Edit</button>
+            </form>
+
+            <h2 class="text-2xl font-semibold mt-8 mb-4 text-center text-gray-800" data-key="purchaseHistoryHeading">Purchase History</h2>
+            <div class="table-container">
+                <table id="purchaseHistoryTable" class="history-table">
+                    <thead>
+                        <tr>
+                            <th data-key="tableProduct">Product</th>
+                            <th data-key="tableQuantity">Quantity</th>
+                            <th data-key="tablePurchasePrice">Purchase Price</th>
+                            <th data-key="tableTotalPurchase">Total Purchase</th>
+                            <th data-key="tablePurchaseDate">Purchase Date</th>
+                            <th data-key="tableActions">Actions</th> <!-- New Column for actions -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Purchase history will be rendered here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sale Entry Section -->
+        <div id="saleContent" class="tab-content">
+            <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800" data-key="newSaleHeading">New Sale</h2>
+            <div id="saleMessage" class="message-box"></div>
+            <form id="saleForm" class="bg-white p-6 rounded-lg shadow-sm">
+                <div class="form-group">
+                    <label for="saleProductName" data-key="productNameLabel">Product Name:</label>
+                    <select id="saleProductName" class="w-full p-3 border border-gray-300 rounded-lg" required>
+                        <option value="" data-key="selectProductOption">-- Select Product --</option>
+                        <!-- Options will be populated from stock -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="soldQuantity" data-key="soldQuantityLabel">Sold Quantity:</label>
+                    <input type="number" id="soldQuantity" min="1" placeholder="e.g., 10" required>
+                </div>
+                <div class="form-group">
+                    <label for="salePrice" data-key="salePriceLabel">Sale Price (per unit):</label>
+                    <input type="number" id="salePrice" step="0.01" min="0" placeholder="e.g., 7.50" required>
+                </div>
+                <button type="submit" class="submit-button" data-key="recordSaleButton">Record Sale</button>
+                <button type="button" id="generateDescriptionButton" class="submit-button mt-4 bg-purple-600 hover:bg-purple-700" data-key="generateDescriptionButton">✨ Generate Description</button>
+            </form>
+
+            <div id="productDescriptionOutput" class="mt-6 p-4 bg-gray-100 rounded-lg shadow-inner hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-2" data-key="productDescriptionLabel">Generated Product Description:</label>
+                <div id="descriptionText" class="text-gray-900 leading-relaxed"></div>
+                <div id="descriptionLoading" class="hidden text-center text-gray-600 mt-2">
+                    <span class="loading-spinner"></span> <span data-key="generatingDescription">Generating description...</span>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-semibold mt-8 mb-4 text-center text-gray-800" data-key="saleHistoryHeading">Sale History</h2>
+            <div class="table-container">
+                <table id="saleHistoryTable" class="history-table">
+                    <thead>
+                        <tr>
+                            <th data-key="tableProduct">Product</th>
+                            <th data-key="tableSoldQuantity">Sold Qty</th>
+                            <th data-key="tableSalePrice">Sale Price</th>
+                            <th data-key="tableActualPurchaseCost">Actual Purchase Cost</th>
+                            <th data-key="tableTotalSale">Total Sale</th>
+                            <th data-key="tableProfit">Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sale history will be rendered here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables to store data
+        let purchaseHistory = [];
+        let saleHistory = [];
+        let stock = {}; // { "Product Name": { quantity: N, avgPurchasePrice: P } }
+        let isEditingPurchase = false; // Flag to indicate if we are in edit mode
+        let currentEditIndex = -1; // Index of the purchase entry being edited
+
+        // DOM Elements
+        const body = document.body;
+        const purchaseTab = document.getElementById('purchaseTab');
+        const saleTab = document.getElementById('saleTab');
+        const purchaseContent = document.getElementById('purchaseContent');
+        const saleContent = document.getElementById('saleContent');
+
+        const purchaseForm = document.getElementById('purchaseForm');
+        const productNameInput = document.getElementById('productName');
+        const purchasePriceInput = document.getElementById('purchasePrice');
+        const purchaseQuantityInput = document.getElementById('purchaseQuantity');
+        const purchaseDateInput = document.getElementById('purchaseDate');
+        const purchaseHistoryTableBody = document.querySelector('#purchaseHistoryTable tbody');
+        const purchaseMessageBox = document.getElementById('purchaseMessage');
+        const addPurchaseButton = document.getElementById('addPurchaseButton');
+        const updatePurchaseButton = document.getElementById('updatePurchaseButton');
+        const cancelEditButton = document.getElementById('cancelEditButton');
+
+        const saleForm = document.getElementById('saleForm');
+        const saleProductNameSelect = document.getElementById('saleProductName');
+        const soldQuantityInput = document.getElementById('soldQuantity');
+        const salePriceInput = document.getElementById('salePrice');
+        const saleHistoryTableBody = document.querySelector('#saleHistoryTable tbody');
+        const saleMessageBox = document.getElementById('saleMessage');
+        const generateDescriptionButton = document.getElementById('generateDescriptionButton');
+        const productDescriptionOutput = document.getElementById('productDescriptionOutput');
+        const descriptionText = document.getElementById('descriptionText');
+        const descriptionLoading = document.getElementById('descriptionLoading');
+
+
+        const languageSelector = document.getElementById('languageSelector');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+
+        // --- Language and Translations ---
+        let currentLanguage = localStorage.getItem('appLanguage') || 'en'; // Load saved language or default to English
+
+        const translations = {
+            en: {
+                appTitle: 'Stationery Shop Manager',
+                mainHeading: 'Stationery Shop Manager',
+                purchaseTab: 'Purchase Entry',
+                saleTab: 'Sale Entry',
+                newPurchaseHeading: 'New Purchase',
+                productNameLabel: 'Product Name:',
+                purchasePriceLabel: 'Purchase Price (per unit):',
+                quantityLabel: 'Quantity:',
+                purchaseDateLabel: 'Purchase Date:',
+                addPurchaseButton: 'Add Purchase',
+                saveChangesButton: 'Save Changes',
+                cancelEditButton: 'Cancel Edit',
+                purchaseHistoryHeading: 'Purchase History',
+                tableProduct: 'Product',
+                tableQuantity: 'Quantity',
+                tablePurchasePrice: 'Purchase Price',
+                tableTotalPurchase: 'Total Purchase',
+                tablePurchaseDate: 'Purchase Date',
+                tableActions: 'Actions',
+                editButton: 'Edit',
+                deleteButton: 'Delete',
+                newSaleHeading: 'New Sale',
+                selectProductOption: '-- Select Product --',
+                soldQuantityLabel: 'Sold Quantity:',
+                salePriceLabel: 'Sale Price (per unit):',
+                recordSaleButton: 'Record Sale',
+                generateDescriptionButton: '✨ Generate Description',
+                productDescriptionLabel: 'Generated Product Description:',
+                generatingDescription: 'Generating description...',
+                saleHistoryHeading: 'Sale History',
+                tableSoldQuantity: 'Sold Qty',
+                tableSalePrice: 'Sale Price',
+                tableActualPurchaseCost: 'Actual Purchase Cost',
+                tableTotalSale: 'Total Sale',
+                tableProfit: 'Profit',
+                darkModeToggle: 'Dark Mode',
+                msgPurchaseSuccess: 'Purchase added successfully!',
+                msgSaleSuccess: 'Sale recorded successfully!',
+                msgInvalidInput: 'Please fill all fields with valid positive numbers for price and quantity.',
+                msgSaleInvalidInput: 'Please select a product and enter valid positive numbers for quantity and price.',
+                msgProductNotInStock: 'Product not in stock or out of stock.',
+                msgNotEnoughStock: 'Not enough stock. Available: ',
+                msgPurchaseDeleted: 'Purchase deleted successfully!',
+                msgPurchaseUpdated: 'Purchase updated successfully!',
+                msgSelectProductForDescription: 'Please select a product to generate its description.',
+                msgDescriptionError: 'Failed to generate description. Please try again.',
+                placeholderProductName: 'e.g., Pen',
+                placeholderPurchasePrice: 'e.g., 5.00',
+                placeholderPurchaseQuantity: 'e.g., 100',
+                placeholderSoldQuantity: 'e.g., 10',
+                placeholderSalePrice: 'e.g., 7.50'
+            },
+            hi: {
+                appTitle: 'स्टेशनरी दुकान प्रबंधक',
+                mainHeading: 'स्टेशनरी दुकान प्रबंधक',
+                purchaseTab: 'बिक्री दर्ज करें', // Changed from 'खरीद दर्ज करें'
+                saleTab: 'खर्च', // Changed from 'बिक्री दर्ज करें'
+                newPurchaseHeading: 'नई बिक्री',
+                productNameLabel: 'उत्पाद का नाम:',
+                purchasePriceLabel: 'बिक्री मूल्य (प्रति इकाई):',
+                quantityLabel: 'मात्रा:',
+                purchaseDateLabel: 'बिक्री की तारीख:',
+                addPurchaseButton: 'बिक्री जोड़ें',
+                saveChangesButton: 'परिवर्तन सहेजें',
+                cancelEditButton: 'संपादित करना रद्द करें',
+                purchaseHistoryHeading: 'बिक्री इतिहास',
+                tableProduct: 'उत्पाद',
+                tableQuantity: 'मात्रा',
+                tablePurchasePrice: 'बिक्री मूल्य',
+                tableTotalPurchase: 'कुल खरीद',
+                tablePurchaseDate: 'बिक्री की तारीख',
+                tableActions: 'कार्य',
+                editButton: 'संपादित करें',
+                deleteButton: 'मिटाएँ',
+                newSaleHeading: 'नई बिक्री',
+                selectProductOption: '-- उत्पाद चुनें --',
+                soldQuantityLabel: 'बेची गई मात्रा:',
+                salePriceLabel: 'बिक्री मूल्य (प्रति इकाई):',
+                recordSaleButton: 'बिक्री दर्ज करें',
+                generateDescriptionButton: '✨ विवरण उत्पन्न करें',
+                productDescriptionLabel: 'उत्पन्न उत्पाद विवरण:',
+                generatingDescription: 'विवरण उत्पन्न हो रहा है...',
+                saleHistoryHeading: 'बिक्री इतिहास',
+                tableSoldQuantity: 'बेची गई मात्रा',
+                tableSalePrice: 'बिक्री मूल्य',
+                tableActualPurchaseCost: 'वास्तविक खरीद लागत',
+                tableTotalSale: 'कुल बिक्री',
+                tableProfit: 'लाभ',
+                darkModeToggle: 'डार्क मोड',
+                msgPurchaseSuccess: 'खरीद सफलतापूर्वक जोड़ी गई!',
+                msgSaleSuccess: 'बिक्री सफलतापूर्वक दर्ज की गई!',
+                msgInvalidInput: 'कृपया मूल्य और मात्रा के लिए सभी फ़ील्ड में वैध धनात्मक संख्याएँ भरें।',
+                msgSaleInvalidInput: 'कृपया एक उत्पाद चुनें और मात्रा और मूल्य के लिए वैध धनात्मक संख्याएँ दर्ज करें।',
+                msgProductNotInStock: 'उत्पाद स्टॉक में नहीं है या स्टॉक खत्म हो गया है।',
+                msgNotEnoughStock: 'पर्याप्त स्टॉक नहीं है। उपलब्ध: ',
+                msgPurchaseDeleted: 'खरीद सफलतापूर्वक मिटा दी गई!',
+                msgPurchaseUpdated: 'खरीद सफलतापूर्वक अपडेट की गई!',
+                msgSelectProductForDescription: 'कृपया विवरण उत्पन्न करने के लिए एक उत्पाद चुनें।',
+                msgDescriptionError: 'विवरण उत्पन्न करने में विफल। कृपया पुनः प्रयास करें।',
+                placeholderProductName: 'जैसे, पेन',
+                placeholderPurchasePrice: 'जैसे, 5.00',
+                placeholderPurchaseQuantity: 'जैसे, 100',
+                placeholderSoldQuantity: 'जैसे, 10',
+                placeholderSalePrice: 'जैसे, 7.50'
+            }
+        };
+
+        // Function to apply translations to the UI
+        function applyTranslations() {
+            const elements = document.querySelectorAll('[data-key]');
+            elements.forEach(element => {
+                const key = element.dataset.key;
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+
+            // Update placeholders manually as data-key only applies to textContent
+            productNameInput.placeholder = translations[currentLanguage].placeholderProductName;
+            purchasePriceInput.placeholder = translations[currentLanguage].placeholderPurchasePrice;
+            purchaseQuantityInput.placeholder = translations[currentLanguage].placeholderPurchaseQuantity;
+            soldQuantityInput.placeholder = translations[currentLanguage].placeholderSoldQuantity;
+            salePriceInput.placeholder = translations[currentLanguage].placeholderSalePrice;
+
+            // Update document title
+            document.title = translations[currentLanguage].appTitle;
+        }
+
+        // Function to show messages to the user (updated to use translations)
+        function showMessage(element, messageKey, isError = false, extraText = '') {
+            const message = translations[currentLanguage][messageKey] + extraText;
+            element.textContent = message;
+            element.classList.remove('hidden');
+            element.classList.add('block');
+            if (isError) {
+                element.classList.add('error');
+            } else {
+                element.classList.remove('error');
+            }
+            // Hide message after 3 seconds
+            setTimeout(() => {
+                element.classList.remove('block');
+                element.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Function to save data to localStorage
+        function saveData() {
+            localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
+            localStorage.setItem('saleHistory', JSON.stringify(saleHistory));
+            localStorage.setItem('stock', JSON.stringify(stock));
+            localStorage.setItem('appLanguage', currentLanguage); // Save current language
+            localStorage.setItem('darkModeEnabled', body.classList.contains('dark-mode')); // Save dark mode preference
+        }
+
+        // Function to load data from localStorage
+        function loadData() {
+            const storedPurchaseHistory = localStorage.getItem('purchaseHistory');
+            const storedSaleHistory = localStorage.getItem('saleHistory');
+            const storedStock = localStorage.getItem('stock');
+            const storedLanguage = localStorage.getItem('appLanguage');
+            const storedDarkMode = localStorage.getItem('darkModeEnabled');
+
+            if (storedPurchaseHistory) {
+                purchaseHistory = JSON.parse(storedPurchaseHistory);
+            }
+            if (storedSaleHistory) {
+                saleHistory = JSON.parse(storedSaleHistory);
+            }
+            if (storedStock) {
+                stock = JSON.parse(storedStock);
+            }
+            if (storedLanguage) {
+                currentLanguage = storedLanguage;
+            }
+            if (storedDarkMode === 'true') {
+                body.classList.add('dark-mode');
+            }
+        }
+
+        // Function to recalculate stock for a specific product
+        function recalculateStockForProduct(productName) {
+            const relevantPurchases = purchaseHistory.filter(p => p.productName.toLowerCase() === productName.toLowerCase());
+            let totalQuantity = 0;
+            let totalPurchaseValue = 0;
+
+            relevantPurchases.forEach(p => {
+                totalQuantity += p.quantity;
+                totalPurchaseValue += p.totalPurchaseAmount;
+            });
+
+            if (totalQuantity > 0) {
+                stock[productName.toLowerCase()] = {
+                    quantity: totalQuantity,
+                    avgPurchasePrice: totalPurchaseValue / totalQuantity
+                };
+            } else {
+                delete stock[productName.toLowerCase()]; // Remove product from stock if no purchases remain
+            }
+        }
+
+        // Function to render purchase history table
+        function renderPurchaseHistory() {
+            purchaseHistoryTableBody.innerHTML = ''; // Clear existing rows
+            purchaseHistory.forEach((entry, index) => {
+                const row = purchaseHistoryTableBody.insertRow();
+                row.insertCell().textContent = entry.productName;
+                row.insertCell().textContent = entry.quantity;
+                row.insertCell().textContent = `₹${entry.purchasePrice.toFixed(2)}`;
+                row.insertCell().textContent = `₹${entry.totalPurchaseAmount.toFixed(2)}`;
+                row.insertCell().textContent = entry.purchaseDate;
+
+                const actionCell = row.insertCell();
+                const editButton = document.createElement('button');
+                editButton.textContent = translations[currentLanguage].editButton;
+                editButton.classList.add('action-button', 'edit', 'mr-2');
+                editButton.onclick = () => editPurchase(index);
+                actionCell.appendChild(editButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = translations[currentLanguage].deleteButton;
+                deleteButton.classList.add('action-button', 'delete');
+                deleteButton.onclick = () => deletePurchase(index);
+                actionCell.appendChild(deleteButton);
+            });
+        }
+
+        // Function to handle editing a purchase entry
+        function editPurchase(index) {
+            isEditingPurchase = true;
+            currentEditIndex = index;
+
+            const entry = purchaseHistory[index];
+            productNameInput.value = entry.productName;
+            purchasePriceInput.value = entry.purchasePrice;
+            purchaseQuantityInput.value = entry.quantity;
+            purchaseDateInput.value = entry.purchaseDate;
+
+            addPurchaseButton.classList.add('hidden');
+            updatePurchaseButton.classList.remove('hidden');
+            cancelEditButton.classList.remove('hidden');
+
+            productNameInput.focus();
+        }
+
+        // Function to handle deleting a purchase entry
+        function deletePurchase(index) {
+            const deletedEntry = purchaseHistory.splice(index, 1)[0]; // Remove the entry
+
+            // Update stock based on the deleted entry
+            const productNameLower = deletedEntry.productName.toLowerCase();
+            if (stock[productNameLower]) {
+                recalculateStockForProduct(productNameLower);
+            }
+
+            saveData();
+            renderPurchaseHistory();
+            updateStockDropdown();
+            showMessage(purchaseMessageBox, 'msgPurchaseDeleted');
+        }
+
+        // Function to render sale history table
+        function renderSaleHistory() {
+            saleHistoryTableBody.innerHTML = ''; // Clear existing rows
+            saleHistory.forEach(entry => {
+                const row = saleHistoryTableBody.insertRow();
+                row.insertCell().textContent = entry.productName;
+                row.insertCell().textContent = entry.soldQuantity;
+                row.insertCell().textContent = `₹${entry.salePrice.toFixed(2)}`;
+                row.insertCell().textContent = `₹${entry.actualPurchaseCostForSoldQty.toFixed(2)}`; // Display Actual Purchase Cost
+                row.insertCell().textContent = `₹${entry.totalSaleAmount.toFixed(2)}`;
+                row.insertCell().textContent = `₹${entry.profit.toFixed(2)}`;
+            });
+        }
+
+        // Function to update the product dropdown in the sale form
+        function updateStockDropdown() {
+            saleProductNameSelect.innerHTML = `<option value="">${translations[currentLanguage].selectProductOption}</option>`; // Clear existing options and add translated default
+            for (const product in stock) {
+                if (stock[product].quantity > 0) { // Only show products that are in stock
+                    const option = document.createElement('option');
+                    option.value = product;
+                    option.textContent = `${product.charAt(0).toUpperCase() + product.slice(1)} (${translations[currentLanguage].tableQuantity}: ${stock[product].quantity})`;
+                    saleProductNameSelect.appendChild(option);
+                }
+            }
+        }
+
+        // --- Gemini API Integration: Product Description Generator ---
+        async function generateProductDescription() {
+            const selectedProduct = saleProductNameSelect.value.trim().toLowerCase();
+
+            if (!selectedProduct) {
+                showMessage(saleMessageBox, 'msgSelectProductForDescription', true);
+                return;
+            }
+
+            const productData = stock[selectedProduct];
+            if (!productData) {
+                showMessage(saleMessageBox, 'msgProductNotInStock', true);
+                return;
+            }
+
+            // Show loading indicator
+            productDescriptionOutput.classList.remove('hidden');
+            descriptionText.textContent = '';
+            descriptionLoading.classList.remove('hidden');
+            generateDescriptionButton.disabled = true; // Disable button during generation
+
+            const productNameDisplay = selectedProduct.charAt(0).toUpperCase() + selectedProduct.slice(1);
+            const avgPrice = productData.avgPurchasePrice.toFixed(2);
+
+            const prompt = `Write a short, engaging product description (around 2-3 sentences) for a stationery item named '${productNameDisplay}'. Its average purchase cost is ₹${avgPrice}. Focus on its utility, quality, and appeal to customers.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // Canvas will automatically provide the API key at runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    descriptionText.textContent = text;
+                } else {
+                    descriptionText.textContent = translations[currentLanguage].msgDescriptionError;
+                    console.error('Gemini API response structure unexpected:', result);
+                }
+            } catch (error) {
+                descriptionText.textContent = translations[currentLanguage].msgDescriptionError;
+                console.error('Error calling Gemini API:', error);
+            } finally {
+                descriptionLoading.classList.add('hidden');
+                generateDescriptionButton.disabled = false; // Re-enable button
+            }
+        }
+
+
+        // --- Event Listeners ---
+
+        // Tab switching logic
+        purchaseTab.addEventListener('click', () => {
+            purchaseTab.classList.add('active');
+            saleTab.classList.remove('active');
+            purchaseContent.classList.add('active');
+            saleContent.classList.remove('active');
+        });
+
+        saleTab.addEventListener('click', () => {
+            saleTab.classList.add('active');
+            purchaseTab.classList.remove('active');
+            saleContent.classList.add('active');
+            purchaseContent.classList.remove('active');
+            updateStockDropdown(); // Update dropdown when switching to sale tab
+            productDescriptionOutput.classList.add('hidden'); // Hide description output when switching tabs
+            descriptionText.textContent = ''; // Clear previous description
+        });
+
+        // Language selector change
+        languageSelector.addEventListener('change', (e) => {
+            currentLanguage = e.target.value;
+            saveData(); // Save selected language
+            applyTranslations(); // Apply new translations
+            renderPurchaseHistory(); // Re-render purchase table to update button texts
+            updateStockDropdown(); // Re-render dropdown with new language text
+        });
+
+        // Dark Mode Toggle
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            saveData(); // Save dark mode preference
+        });
+
+        // Purchase Form Submission (Add/Update)
+        purchaseForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            const productName = productNameInput.value.trim().toLowerCase(); // Convert to lowercase for consistent key
+            const purchasePrice = parseFloat(purchasePriceInput.value);
+            const purchaseQuantity = parseInt(purchaseQuantityInput.value);
+            const purchaseDate = purchaseDateInput.value;
+
+            // Input validation
+            if (!productName || isNaN(purchasePrice) || purchasePrice <= 0 || isNaN(purchaseQuantity) || purchaseQuantity <= 0 || !purchaseDate) {
+                showMessage(purchaseMessageBox, 'msgInvalidInput', true);
+                return;
+            }
+
+            const totalPurchaseAmount = purchasePrice * purchaseQuantity;
+
+            if (isEditingPurchase) {
+                // Update existing entry
+                purchaseHistory[currentEditIndex] = {
+                    productName: productName.charAt(0).toUpperCase() + productName.slice(1),
+                    purchasePrice: purchasePrice,
+                    quantity: purchaseQuantity,
+                    totalPurchaseAmount: totalPurchaseAmount,
+                    purchaseDate: purchaseDate
+                };
+                showMessage(purchaseMessageBox, 'msgPurchaseUpdated');
+                isEditingPurchase = false;
+                currentEditIndex = -1;
+                addPurchaseButton.classList.remove('hidden');
+                updatePurchaseButton.classList.add('hidden');
+                cancelEditButton.classList.add('hidden');
+
+            } else {
+                // Add new entry
+                purchaseHistory.push({
+                    productName: productName.charAt(0).toUpperCase() + productName.slice(1),
+                    purchasePrice: purchasePrice,
+                    quantity: purchaseQuantity,
+                    totalPurchaseAmount: totalPurchaseAmount,
+                    purchaseDate: purchaseDate
+                });
+                showMessage(purchaseMessageBox, 'msgPurchaseSuccess');
+            }
+
+            // Recalculate stock for the affected product after add/update
+            recalculateStockForProduct(productName);
+
+            saveData(); // Save data to localStorage
+            renderPurchaseHistory(); // Update table
+            updateStockDropdown(); // Update sale dropdown
+
+            // Clear form
+            purchaseForm.reset();
+            productNameInput.focus();
+        });
+
+        // Cancel Edit Button
+        cancelEditButton.addEventListener('click', () => {
+            isEditingPurchase = false;
+            currentEditIndex = -1;
+            purchaseForm.reset();
+            addPurchaseButton.classList.remove('hidden');
+            updatePurchaseButton.classList.add('hidden');
+            cancelEditButton.classList.add('hidden');
+            productNameInput.focus();
+        });
+
+
+        // Sale Form Submission
+        saleForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            const saleProductName = saleProductNameSelect.value.trim().toLowerCase(); // Use lowercase for stock lookup
+            const soldQuantity = parseInt(soldQuantityInput.value);
+            const salePrice = parseFloat(salePriceInput.value);
+
+            // Input validation
+            if (!saleProductName || isNaN(soldQuantity) || soldQuantity <= 0 || isNaN(salePrice) || salePrice <= 0) {
+                showMessage(saleMessageBox, 'msgSaleInvalidInput', true);
+                return;
+            }
+
+            // Check if product exists in stock
+            if (!stock[saleProductName] || stock[saleProductName].quantity === 0) {
+                showMessage(saleMessageBox, 'msgProductNotInStock', true);
+                return;
+            }
+
+            // Check if enough quantity is available
+            if (stock[saleProductName].quantity < soldQuantity) {
+                showMessage(saleMessageBox, 'msgNotEnoughStock', true, `${stock[saleProductName].quantity}`);
+                return;
+            }
+
+            const totalSaleAmount = soldQuantity * salePrice;
+            const purchasePricePerUnit = stock[saleProductName].avgPurchasePrice;
+            const actualPurchaseCostForSoldQty = soldQuantity * purchasePricePerUnit; // Calculate actual purchase cost for sold quantity
+            const profit = totalSaleAmount - actualPurchaseCostForSoldQty; // Profit = Total Sale - Actual Purchase Cost
+
+            // Add to sale history
+            saleHistory.push({
+                productName: saleProductName.charAt(0).toUpperCase() + saleProductName.slice(1), // Capitalize first letter for display
+                soldQuantity: soldQuantity,
+                salePrice: salePrice,
+                actualPurchaseCostForSoldQty: actualPurchaseCostForSoldQty, // Store actual purchase cost
+                totalSaleAmount: totalSaleAmount,
+                profit: profit
+            });
+
+            // Update stock
+            stock[saleProductName].quantity -= soldQuantity;
+
+            saveData(); // Save data to localStorage
+            renderSaleHistory(); // Update table
+            updateStockDropdown(); // Update sale dropdown (to reflect reduced stock)
+            showMessage(saleMessageBox, 'msgSaleSuccess');
+
+            // Clear form
+            saleForm.reset();
+            saleProductNameSelect.value = ''; // Reset dropdown
+            productDescriptionOutput.classList.add('hidden'); // Hide description output after sale
+            descriptionText.textContent = ''; // Clear previous description
+        });
+
+        // Event listener for the new Gemini API feature button
+        generateDescriptionButton.addEventListener('click', generateProductDescription);
+
+
+        // --- Initial Load ---
+        window.onload = () => {
+            loadData(); // Load data when the page loads
+            languageSelector.value = currentLanguage; // Set the selector to the loaded language
+            applyTranslations(); // Apply translations based on loaded language
+            renderPurchaseHistory(); // Render purchase history
+            renderSaleHistory(); // Render sale history
+            updateStockDropdown(); // Populate sale product dropdown
+            // Set default date to today for convenience
+            const today = new Date().toISOString().split('T')[0];
+            purchaseDateInput.value = today;
+        };
+    </script>
+</body>
+</html>
