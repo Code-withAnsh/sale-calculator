@@ -50,6 +50,7 @@
             border-radius: 0.5rem;
             border: 1px solid #d1d5db;
             background-color: white;
+            color: #333; /* Explicitly set a dark color for light mode */
             font-size: 0.875rem;
             cursor: pointer;
             outline: none;
@@ -59,7 +60,7 @@
         .dark-mode-toggle-container {
             position: absolute;
             top: 1rem;
-            left: 1rem;
+left: 1rem;
             z-index: 20;
         }
         .dark-mode-toggle {
@@ -226,6 +227,46 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .summary-card {
+            background-color: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        .summary-item strong {
+            color: #1f2937;
+        }
+        .summary-item span {
+            font-weight: 500;
+            color: #4b5563;
+        }
+        .summary-item.profit span {
+            color: #10b981; /* Green for profit */
+        }
+        .summary-item.loss span {
+            color: #ef4444; /* Red for loss */
+        }
+        .low-stock-list ul {
+            list-style: disc;
+            margin-left: 1.5rem;
+            padding-left: 0;
+        }
+        .low-stock-list li {
+            margin-bottom: 0.5rem;
+            color: #ef4444; /* Red for low stock */
+            font-weight: 500;
+        }
 
         /* --- Dark Mode Styles --- */
         body.dark-mode {
@@ -239,7 +280,16 @@
         body.dark-mode .header-container {
             background-color: #4a5568; /* Darker indigo for header */
         }
-        body.dark-mode .language-selector,
+        body.dark-mode .language-selector {
+            background-color: #4a5568;
+            color: #e2e8f0; /* Light color for dark mode */
+            border-color: #4a5568;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        body.dark-mode .language-selector option { /* Explicitly style options in dark mode */
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
         body.dark-mode .dark-mode-toggle {
             background-color: #4a5568;
             color: #e2e8f0;
@@ -300,6 +350,68 @@
             background-color: #e53e3e; /* Darker red for error */
             color: #fed7d7;
         }
+        body.dark-mode .summary-card {
+            background-color: #4a5568;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        body.dark-mode .summary-item {
+            border-bottom-color: #667eea; /* Lighter dashed line */
+        }
+        body.dark-mode .summary-item strong {
+            color: #e2e8f0;
+        }
+        body.dark-mode .summary-item span {
+            color: #cbd5e0;
+        }
+        body.dark-mode .summary-item.profit span {
+            color: #48bb78; /* Brighter green for profit */
+        }
+        body.dark-mode .summary-item.loss span {
+            color: #fc8181; /* Brighter red for loss */
+        }
+        body.dark-mode .low-stock-list li {
+            color: #fc8181; /* Brighter red for low stock */
+        }
+        body.dark-mode #productDescriptionOutput {
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+        body.dark-mode #productDescriptionOutput label {
+            color: #e2e8f0;
+        }
+        body.dark-mode #descriptionText {
+            color: #e2e8f0;
+        }
+        body.dark-mode #descriptionLoading {
+            color: #cbd5e0;
+        }
+        /* Styles for calculated fields */
+        .calculated-value-display {
+            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            background-color: #f0f2f5; /* Light gray background */
+            border: 1px solid #d1d5db;
+            color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        body.dark-mode .calculated-value-display {
+            background-color: #4a5568;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .calculated-value-display.profit-positive {
+            color: #10b981; /* Green for positive profit */
+        }
+        .calculated-value-display.profit-negative {
+            color: #ef4444; /* Red for negative profit */
+        }
+        body.dark-mode .calculated-value-display.profit-positive {
+            color: #48bb78; /* Brighter green for dark mode */
+        }
+        body.dark-mode .calculated-value-display.profit-negative {
+            color: #fc8181; /* Brighter red for dark mode */
+        }
     </style>
 </head>
 <body>
@@ -320,6 +432,7 @@
         <div class="flex border-b border-gray-200">
             <button id="purchaseTab" class="tab-button active" data-key="purchaseTab">Purchase Entry</button>
             <button id="saleTab" class="tab-button" data-key="saleTab">Sale Entry</button>
+            <button id="reportsTab" class="tab-button" data-key="reportsTab">Reports & Insights</button>
         </div>
 
         <!-- Purchase Entry Section -->
@@ -374,11 +487,11 @@
             <div id="saleMessage" class="message-box"></div>
             <form id="saleForm" class="bg-white p-6 rounded-lg shadow-sm">
                 <div class="form-group">
-                    <label for="saleProductName" data-key="productNameLabel">Product Name:</label>
-                    <select id="saleProductName" class="w-full p-3 border border-gray-300 rounded-lg" required>
-                        <option value="" data-key="selectProductOption">-- Select Product --</option>
+                    <label for="saleProductNameInput" data-key="productNameLabel">Product Name:</label>
+                    <input type="text" id="saleProductNameInput" list="productSuggestions" placeholder="e.g., Pen" required class="capitalize w-full p-3 border border-gray-300 rounded-lg">
+                    <datalist id="productSuggestions">
                         <!-- Options will be populated from stock -->
-                    </select>
+                    </datalist>
                 </div>
                 <div class="form-group">
                     <label for="soldQuantity" data-key="soldQuantityLabel">Sold Quantity:</label>
@@ -388,8 +501,24 @@
                     <label for="salePrice" data-key="salePriceLabel">Sale Price (per unit):</label>
                     <input type="number" id="salePrice" step="0.01" min="0" placeholder="e.g., 7.50" required>
                 </div>
+                <!-- Input for Actual Purchase Price PER UNIT -->
+                <div class="form-group">
+                    <label for="actualPurchasePricePerUnitInput" data-key="actualPurchasePricePerUnitLabel">Actual Purchase Price (per unit):</label>
+                    <input type="number" id="actualPurchasePricePerUnitInput" step="0.01" min="0" placeholder="e.g., 5.00" class="w-full p-3 border border-gray-300 rounded-lg">
+                </div>
+                <!-- Display for Calculated Total Purchase Cost -->
+                <div class="form-group">
+                    <label data-key="calculatedTotalPurchaseCostLabel">Calculated Total Purchase Cost (for sold qty):</label>
+                    <span id="calculatedTotalPurchaseCostDisplay" class="calculated-value-display">₹0.00</span>
+                </div>
+                <div class="form-group">
+                    <label data-key="calculatedProfitLabel">Calculated Profit (for sold qty):</label>
+                    <span id="calculatedProfitDisplay" class="calculated-value-display">₹0.00</span>
+                </div>
+                <!-- End new section -->
                 <button type="submit" class="submit-button" data-key="recordSaleButton">Record Sale</button>
                 <button type="button" id="generateDescriptionButton" class="submit-button mt-4 bg-purple-600 hover:bg-purple-700" data-key="generateDescriptionButton">✨ Generate Description</button>
+                <button type="button" id="requestNotificationPermissionButton" class="submit-button mt-4 bg-green-600 hover:bg-green-700" data-key="requestNotificationPermissionButton">🔔 Request Notification Permission</button>
             </form>
 
             <div id="productDescriptionOutput" class="mt-6 p-4 bg-gray-100 rounded-lg shadow-inner hidden">
@@ -419,6 +548,52 @@
                 </table>
             </div>
         </div>
+
+        <!-- Reports & Insights Section -->
+        <div id="reportsContent" class="tab-content">
+            <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800" data-key="reportsHeading">Reports & Insights</h2>
+            <div id="reportsMessage" class="message-box"></div>
+
+            <!-- Financial Summary -->
+            <div class="summary-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800" data-key="financialSummaryHeading">Financial Summary</h3>
+                <div class="summary-item">
+                    <strong data-key="totalPurchaseLabel">Total Purchase:</strong>
+                    <span id="totalPurchaseAmount">₹0.00</span>
+                </div>
+                <div class="summary-item">
+                    <strong data-key="totalSaleLabel">Total Sale:</strong>
+                    <span id="totalSaleAmount">₹0.00</span>
+                </div>
+                <div class="summary-item" id="overallProfitItem">
+                    <strong data-key="overallProfitLabel">Overall Profit:</strong>
+                    <span id="overallProfit">₹0.00</span>
+                </div>
+            </div>
+
+            <!-- Low Stock Products -->
+            <div class="summary-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800" data-key="lowStockHeading">Low Stock Products (<span id="lowStockThreshold">10</span> or less)</h3>
+                <div id="lowStockList" class="low-stock-list">
+                    <ul>
+                        <!-- Low stock products will be listed here -->
+                    </ul>
+                </div>
+                <div id="noLowStockMessage" class="text-gray-600 italic hidden" data-key="noLowStock">No products currently low in stock.</div>
+            </div>
+
+            <!-- Sales Performance Analysis -->
+            <div class="summary-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800" data-key="salesAnalysisHeading">Sales Performance Analysis (AI-Powered)</h3>
+                <button type="button" id="generateSalesAnalysisButton" class="submit-button mb-4 bg-blue-600 hover:bg-blue-700" data-key="generateSalesAnalysisButton">📊 Generate Analysis</button>
+                <div id="salesAnalysisOutput" class="p-4 bg-gray-100 rounded-lg shadow-inner hidden">
+                    <div id="analysisText" class="text-gray-900 leading-relaxed"></div>
+                    <div id="analysisLoading" class="hidden text-center text-gray-600 mt-2">
+                        <span class="loading-spinner"></span> <span data-key="generatingAnalysis">Generating analysis...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -428,13 +603,16 @@
         let stock = {}; // { "Product Name": { quantity: N, avgPurchasePrice: P } }
         let isEditingPurchase = false; // Flag to indicate if we are in edit mode
         let currentEditIndex = -1; // Index of the purchase entry being edited
+        const LOW_STOCK_THRESHOLD = 10; // Define low stock threshold
 
         // DOM Elements
         const body = document.body;
         const purchaseTab = document.getElementById('purchaseTab');
         const saleTab = document.getElementById('saleTab');
+        const reportsTab = document.getElementById('reportsTab'); // New tab
         const purchaseContent = document.getElementById('purchaseContent');
         const saleContent = document.getElementById('saleContent');
+        const reportsContent = document.getElementById('reportsContent'); // New content section
 
         const purchaseForm = document.getElementById('purchaseForm');
         const productNameInput = document.getElementById('productName');
@@ -448,7 +626,7 @@
         const cancelEditButton = document.getElementById('cancelEditButton');
 
         const saleForm = document.getElementById('saleForm');
-        const saleProductNameSelect = document.getElementById('saleProductName');
+        const saleProductNameInput = document.getElementById('saleProductNameInput'); // Input field with datalist
         const soldQuantityInput = document.getElementById('soldQuantity');
         const salePriceInput = document.getElementById('salePrice');
         const saleHistoryTableBody = document.querySelector('#saleHistoryTable tbody');
@@ -458,12 +636,37 @@
         const descriptionText = document.getElementById('descriptionText');
         const descriptionLoading = document.getElementById('descriptionLoading');
 
+        const productSuggestionsDatalist = document.getElementById('productSuggestions'); // Datalist element
 
         const languageSelector = document.getElementById('languageSelector');
         const darkModeToggle = document.getElementById('darkModeToggle');
 
+        // Reports Section DOM Elements
+        const reportsMessageBox = document.getElementById('reportsMessage');
+        const totalPurchaseAmountSpan = document.getElementById('totalPurchaseAmount');
+        const totalSaleAmountSpan = document.getElementById('totalSaleAmount');
+        const overallProfitSpan = document.getElementById('overallProfit');
+        const overallProfitItem = document.getElementById('overallProfitItem');
+        const lowStockListUl = document.querySelector('#lowStockList ul');
+        const noLowStockMessage = document.getElementById('noLowStockMessage');
+        const lowStockThresholdSpan = document.getElementById('lowStockThreshold');
+        const generateSalesAnalysisButton = document.getElementById('generateSalesAnalysisButton');
+        const salesAnalysisOutput = document.getElementById('salesAnalysisOutput');
+        const analysisText = document.getElementById('analysisText');
+        const analysisLoading = document.getElementById('analysisLoading');
+
+        // New DOM elements for calculated display
+        const actualPurchasePricePerUnitInput = document.getElementById('actualPurchasePricePerUnitInput'); // Input for per unit price
+        const calculatedTotalPurchaseCostDisplay = document.getElementById('calculatedTotalPurchaseCostDisplay'); // Display for total cost
+        const calculatedProfitDisplay = document.getElementById('calculatedProfitDisplay');
+
+        // Notification button
+        const requestNotificationPermissionButton = document.getElementById('requestNotificationPermissionButton');
+
+
         // --- Language and Translations ---
-        let currentLanguage = localStorage.getItem('appLanguage') || 'en'; // Load saved language or default to English
+        // Changed default language to 'hi'
+        let currentLanguage = localStorage.getItem('appLanguage') || 'hi'; // Load saved language or default to Hindi
 
         const translations = {
             en: {
@@ -471,6 +674,7 @@
                 mainHeading: 'Stationery Shop Manager',
                 purchaseTab: 'Purchase Entry',
                 saleTab: 'Sale Entry',
+                reportsTab: 'Reports & Insights', // New
                 newPurchaseHeading: 'New Purchase',
                 productNameLabel: 'Product Name:',
                 purchasePriceLabel: 'Purchase Price (per unit):',
@@ -492,6 +696,9 @@
                 selectProductOption: '-- Select Product --',
                 soldQuantityLabel: 'Sold Quantity:',
                 salePriceLabel: 'Sale Price (per unit):',
+                actualPurchasePricePerUnitLabel: 'Actual Purchase Price (per unit):', // New label
+                calculatedTotalPurchaseCostLabel: 'Calculated Total Purchase Cost (for sold qty):', // New label
+                calculatedProfitLabel: 'Calculated Profit (for sold qty):',
                 recordSaleButton: 'Record Sale',
                 generateDescriptionButton: '✨ Generate Description',
                 productDescriptionLabel: 'Generated Product Description:',
@@ -503,6 +710,19 @@
                 tableTotalSale: 'Total Sale',
                 tableProfit: 'Profit',
                 darkModeToggle: 'Dark Mode',
+                reportsHeading: 'Reports & Insights', // New
+                financialSummaryHeading: 'Financial Summary', // New
+                totalPurchaseLabel: 'Total Purchase:', // New
+                totalSaleLabel: 'Total Sale:', // New
+                overallProfitLabel: 'Overall Profit:', // New
+                lowStockHeading: `Low Stock Products (${LOW_STOCK_THRESHOLD} or less)`, // New
+                noLowStock: 'No products currently low in stock.', // New
+                salesAnalysisHeading: 'Sales Performance Analysis (AI-Powered)', // New
+                generateSalesAnalysisButton: '📊 Generate Analysis', // New
+                generatingAnalysis: 'Generating analysis...', // New
+                requestNotificationPermissionButton: '🔔 Request Notification Permission', // New
+                notificationTitle: 'New Sale Recorded!', // New
+                notificationBody: 'Product: {productName}\nQty: {soldQuantity}, Sale: ₹{totalSaleAmount}, Profit: ₹{profit}', // New
                 msgPurchaseSuccess: 'Purchase added successfully!',
                 msgSaleSuccess: 'Sale recorded successfully!',
                 msgInvalidInput: 'Please fill all fields with valid positive numbers for price and quantity.',
@@ -513,31 +733,39 @@
                 msgPurchaseUpdated: 'Purchase updated successfully!',
                 msgSelectProductForDescription: 'Please select a product to generate its description.',
                 msgDescriptionError: 'Failed to generate description. Please try again.',
+                msgAnalysisError: 'Failed to generate analysis. Please try again.', // New
+                msgNoSaleDataForAnalysis: 'No sale data available for analysis.', // New
+                msgNotificationGranted: 'Notification permission granted!', // New
+                msgNotificationDenied: 'Notification permission denied. You will not receive desktop notifications.', // New
+                msgNotificationBlocked: 'Notification permission blocked. Please enable it in your browser settings.', // New
+                msgNotificationNotSupported: 'Notifications are not supported by your browser.', // New
                 placeholderProductName: 'e.g., Pen',
                 placeholderPurchasePrice: 'e.g., 5.00',
                 placeholderPurchaseQuantity: 'e.g., 100',
                 placeholderSoldQuantity: 'e.g., 10',
-                placeholderSalePrice: 'e.g., 7.50'
+                placeholderSalePrice: 'e.g., 7.50',
+                placeholderActualPurchasePricePerUnit: 'e.g., 5.00' // New placeholder
             },
             hi: {
                 appTitle: 'स्टेशनरी दुकान प्रबंधक',
                 mainHeading: 'स्टेशनरी दुकान प्रबंधक',
-                purchaseTab: 'बिक्री दर्ज करें', // Changed from 'खरीद दर्ज करें'
-                saleTab: 'खर्च', // Changed from 'बिक्री दर्ज करें'
-                newPurchaseHeading: 'नई बिक्री',
+                purchaseTab: 'खरीद दर्ज करें',
+                saleTab: 'बिक्री दर्ज करें',
+                reportsTab: 'रिपोर्ट और अंतर्दृष्टि',
+                newPurchaseHeading: 'नई खरीद',
                 productNameLabel: 'उत्पाद का नाम:',
-                purchasePriceLabel: 'बिक्री मूल्य (प्रति इकाई):',
+                purchasePriceLabel: 'खरीद मूल्य (प्रति इकाई):',
                 quantityLabel: 'मात्रा:',
-                purchaseDateLabel: 'बिक्री की तारीख:',
-                addPurchaseButton: 'बिक्री जोड़ें',
+                purchaseDateLabel: 'खरीद की तारीख:',
+                addPurchaseButton: 'खरीद जोड़ें',
                 saveChangesButton: 'परिवर्तन सहेजें',
                 cancelEditButton: 'संपादित करना रद्द करें',
-                purchaseHistoryHeading: 'बिक्री इतिहास',
+                purchaseHistoryHeading: 'खरीद इतिहास',
                 tableProduct: 'उत्पाद',
                 tableQuantity: 'मात्रा',
-                tablePurchasePrice: 'बिक्री मूल्य',
+                tablePurchasePrice: 'खरीद मूल्य',
                 tableTotalPurchase: 'कुल खरीद',
-                tablePurchaseDate: 'बिक्री की तारीख',
+                tablePurchaseDate: 'खरीद की तारीख',
                 tableActions: 'कार्य',
                 editButton: 'संपादित करें',
                 deleteButton: 'मिटाएँ',
@@ -545,6 +773,9 @@
                 selectProductOption: '-- उत्पाद चुनें --',
                 soldQuantityLabel: 'बेची गई मात्रा:',
                 salePriceLabel: 'बिक्री मूल्य (प्रति इकाई):',
+                actualPurchasePricePerUnitLabel: 'वास्तविक खरीद मूल्य (प्रति इकाई):', // New label
+                calculatedTotalPurchaseCostLabel: 'गणना की गई कुल खरीद लागत (बेची गई मात्रा के लिए):', // New label
+                calculatedProfitLabel: 'गणना किया गया लाभ (बेची गई मात्रा के लिए):',
                 recordSaleButton: 'बिक्री दर्ज करें',
                 generateDescriptionButton: '✨ विवरण उत्पन्न करें',
                 productDescriptionLabel: 'उत्पन्न उत्पाद विवरण:',
@@ -556,6 +787,19 @@
                 tableTotalSale: 'कुल बिक्री',
                 tableProfit: 'लाभ',
                 darkModeToggle: 'डार्क मोड',
+                reportsHeading: 'रिपोर्ट और अंतर्दृष्टि',
+                financialSummaryHeading: 'वित्तीय सारांश',
+                totalPurchaseLabel: 'कुल खरीद:',
+                totalSaleLabel: 'कुल बिक्री:',
+                overallProfitLabel: 'कुल लाभ:',
+                lowStockHeading: `कम स्टॉक वाले उत्पाद (${LOW_STOCK_THRESHOLD} या कम)`,
+                noLowStock: 'वर्तमान में कोई उत्पाद कम स्टॉक में नहीं है।',
+                salesAnalysisHeading: 'बिक्री प्रदर्शन विश्लेषण (एआई-संचालित)',
+                generateSalesAnalysisButton: '📊 विश्लेषण उत्पन्न करें',
+                generatingAnalysis: 'विश्लेषण उत्पन्न हो रहा है...',
+                requestNotificationPermissionButton: '🔔 नोटिफिकेशन की अनुमति दें', // New
+                notificationTitle: 'नई बिक्री दर्ज की गई!', // New
+                notificationBody: 'उत्पाद: {productName}\nमात्रा: {soldQuantity}, बिक्री: ₹{totalSaleAmount}, लाभ: ₹{profit}', // New
                 msgPurchaseSuccess: 'खरीद सफलतापूर्वक जोड़ी गई!',
                 msgSaleSuccess: 'बिक्री सफलतापूर्वक दर्ज की गई!',
                 msgInvalidInput: 'कृपया मूल्य और मात्रा के लिए सभी फ़ील्ड में वैध धनात्मक संख्याएँ भरें।',
@@ -566,11 +810,18 @@
                 msgPurchaseUpdated: 'खरीद सफलतापूर्वक अपडेट की गई!',
                 msgSelectProductForDescription: 'कृपया विवरण उत्पन्न करने के लिए एक उत्पाद चुनें।',
                 msgDescriptionError: 'विवरण उत्पन्न करने में विफल। कृपया पुनः प्रयास करें।',
+                msgAnalysisError: 'विश्लेषण उत्पन्न करने में विफल। कृपया पुनः प्रयास करें।',
+                msgNoSaleDataForAnalysis: 'विश्लेषण के लिए कोई बिक्री डेटा उपलब्ध नहीं है।',
+                msgNotificationGranted: 'नोटिफिकेशन की अनुमति मिल गई!',
+                msgNotificationDenied: 'नोटिफिकेशन की अनुमति अस्वीकृत। आपको डेस्कटॉप नोटिफिकेशन नहीं मिलेंगे।',
+                msgNotificationBlocked: 'नोटिफिकेशन की अनुमति अवरुद्ध है। कृपया इसे अपने ब्राउज़र सेटिंग्स में सक्षम करें।',
+                msgNotificationNotSupported: 'आपका ब्राउज़र नोटिफिकेशन का समर्थन नहीं करता है।',
                 placeholderProductName: 'जैसे, पेन',
                 placeholderPurchasePrice: 'जैसे, 5.00',
                 placeholderPurchaseQuantity: 'जैसे, 100',
                 placeholderSoldQuantity: 'जैसे, 10',
-                placeholderSalePrice: 'जैसे, 7.50'
+                placeholderSalePrice: 'जैसे, 7.50',
+                placeholderActualPurchasePricePerUnit: 'जैसे, 5.00'
             }
         };
 
@@ -589,7 +840,10 @@
             purchasePriceInput.placeholder = translations[currentLanguage].placeholderPurchasePrice;
             purchaseQuantityInput.placeholder = translations[currentLanguage].placeholderPurchaseQuantity;
             soldQuantityInput.placeholder = translations[currentLanguage].placeholderSoldQuantity;
+            saleProductNameInput.placeholder = translations[currentLanguage].placeholderProductName;
             salePriceInput.placeholder = translations[currentLanguage].placeholderSalePrice;
+            actualPurchasePricePerUnitInput.placeholder = translations[currentLanguage].placeholderActualPurchasePricePerUnit; // Updated placeholder
+            lowStockThresholdSpan.textContent = LOW_STOCK_THRESHOLD; // Update threshold display
 
             // Update document title
             document.title = translations[currentLanguage].appTitle;
@@ -707,7 +961,7 @@
 
             addPurchaseButton.classList.add('hidden');
             updatePurchaseButton.classList.remove('hidden');
-            cancelEditButton.classList.remove('hidden');
+            cancelEditButton.classList.add('hidden');
 
             productNameInput.focus();
         }
@@ -725,6 +979,7 @@
             saveData();
             renderPurchaseHistory();
             updateStockDropdown();
+            updateReports(); // Update reports after data change
             showMessage(purchaseMessageBox, 'msgPurchaseDeleted');
         }
 
@@ -742,44 +997,116 @@
             });
         }
 
-        // Function to update the product dropdown in the sale form
+        // Function to update the product datalist in the sale form
         function updateStockDropdown() {
-            saleProductNameSelect.innerHTML = `<option value="">${translations[currentLanguage].selectProductOption}</option>`; // Clear existing options and add translated default
+            productSuggestionsDatalist.innerHTML = ''; // Clear existing options
             for (const product in stock) {
                 if (stock[product].quantity > 0) { // Only show products that are in stock
                     const option = document.createElement('option');
-                    option.value = product;
-                    option.textContent = `${product.charAt(0).toUpperCase() + product.slice(1)} (${translations[currentLanguage].tableQuantity}: ${stock[product].quantity})`;
-                    saleProductNameSelect.appendChild(option);
+                    option.value = product.charAt(0).toUpperCase() + product.slice(1); // Display capitalized name as suggestion
+                    productSuggestionsDatalist.appendChild(option);
                 }
             }
         }
 
-        // --- Gemini API Integration: Product Description Generator ---
-        async function generateProductDescription() {
-            const selectedProduct = saleProductNameSelect.value.trim().toLowerCase();
+        // --- Live Sale Calculation Display Function ---
+        function updateSaleCalculationsDisplay() {
+            const soldQty = parseInt(soldQuantityInput.value);
+            const salePrice = parseFloat(salePriceInput.value);
+            const actualPurchasePricePerUnit = parseFloat(actualPurchasePricePerUnitInput.value); // Get value from the new per-unit input
 
-            if (!selectedProduct) {
-                showMessage(saleMessageBox, 'msgSelectProductForDescription', true);
-                return;
+            let totalActualPurchaseCost = 0;
+            let profit = 0;
+
+            // Reset profit display class
+            calculatedProfitDisplay.classList.remove('profit-positive', 'profit-negative');
+
+            // Calculate total actual purchase cost and profit only if all necessary inputs are valid
+            if (!isNaN(soldQty) && soldQty > 0 && !isNaN(salePrice) && salePrice >= 0 && !isNaN(actualPurchasePricePerUnit) && actualPurchasePricePerUnit >= 0) {
+                totalActualPurchaseCost = soldQty * actualPurchasePricePerUnit; // This line already does the multiplication
+                profit = (soldQty * salePrice) - totalActualPurchaseCost;
             }
 
-            const productData = stock[selectedProduct];
-            if (!productData) {
-                showMessage(saleMessageBox, 'msgProductNotInStock', true);
+            calculatedTotalPurchaseCostDisplay.textContent = `₹${totalActualPurchaseCost.toFixed(2)}`; // This line updates the total display
+            calculatedProfitDisplay.textContent = `₹${profit.toFixed(2)}`;
+
+            // Apply color based on profit/loss for live display
+            if (profit > 0) {
+                calculatedProfitDisplay.classList.add('profit-positive');
+            } else if (profit < 0) {
+                calculatedProfitDisplay.classList.add('profit-negative');
+            }
+        }
+
+
+        // --- Reports & Insights Functions ---
+        function calculateFinancialSummary() {
+            let totalPurchase = 0;
+            purchaseHistory.forEach(entry => {
+                totalPurchase += entry.totalPurchaseAmount;
+            });
+
+            let totalSale = 0;
+            let overallProfit = 0;
+            saleHistory.forEach(entry => {
+                totalSale += entry.totalSaleAmount;
+                overallProfit += entry.profit;
+            });
+
+            totalPurchaseAmountSpan.textContent = `₹${totalPurchase.toFixed(2)}`;
+            totalSaleAmountSpan.textContent = `₹${totalSale.toFixed(2)}`;
+            overallProfitSpan.textContent = `₹${overallProfit.toFixed(2)}`;
+
+            // Apply color based on profit/loss
+            overallProfitItem.classList.remove('profit', 'loss');
+            if (overallProfit > 0) {
+                overallProfitItem.classList.add('profit');
+            } else if (overallProfit < 0) {
+                overallProfitItem.classList.add('loss');
+            }
+        }
+
+        function renderLowStockProducts() {
+            lowStockListUl.innerHTML = ''; // Clear existing list
+            let hasLowStock = false;
+            for (const product in stock) {
+                if (stock[product].quantity <= LOW_STOCK_THRESHOLD) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${product.charAt(0).toUpperCase() + product.slice(1)} (${translations[currentLanguage].tableQuantity}: ${stock[product].quantity})`;
+                    lowStockListUl.appendChild(listItem);
+                    hasLowStock = true;
+                }
+            }
+
+            if (hasLowStock) {
+                noLowStockMessage.classList.add('hidden');
+                lowStockListUl.classList.remove('hidden');
+            } else {
+                noLowStockMessage.classList.remove('hidden');
+                lowStockListUl.classList.add('hidden');
+            }
+        }
+
+        async function generateSalesPerformanceAnalysis() {
+            if (saleHistory.length === 0) {
+                showMessage(reportsMessageBox, 'msgNoSaleDataForAnalysis', true);
                 return;
             }
 
             // Show loading indicator
-            productDescriptionOutput.classList.remove('hidden');
-            descriptionText.textContent = '';
-            descriptionLoading.classList.remove('hidden');
-            generateDescriptionButton.disabled = true; // Disable button during generation
+            salesAnalysisOutput.classList.remove('hidden');
+            analysisText.textContent = '';
+            analysisLoading.classList.remove('hidden');
+            generateSalesAnalysisButton.disabled = true;
 
-            const productNameDisplay = selectedProduct.charAt(0).toUpperCase() + selectedProduct.slice(1);
-            const avgPrice = productData.avgPurchasePrice.toFixed(2);
+            const salesDataForPrompt = saleHistory.map(item => ({
+                product: item.productName,
+                quantity: item.soldQuantity,
+                salePrice: item.salePrice,
+                profit: item.profit
+            }));
 
-            const prompt = `Write a short, engaging product description (around 2-3 sentences) for a stationery item named '${productNameDisplay}'. Its average purchase cost is ₹${avgPrice}. Focus on its utility, quality, and appeal to customers.`;
+            const prompt = `Analyze the following sales data for a stationery shop. Identify the top 3 best-selling products by quantity, the top 3 most profitable products, and any 3 slowest-moving products (if applicable, based on quantity). Also, provide a brief, general insight or recommendation based on this data. Format the output clearly with headings for each section (e.g., "Top Selling Products:", "Most Profitable Products:", "Slowest Moving Products:", "General Insights:").\n\nSales Data: ${JSON.stringify(salesDataForPrompt)}`;
 
             let chatHistory = [];
             chatHistory.push({ role: "user", parts: [{ text: prompt }] });
@@ -805,17 +1132,59 @@
                     result.candidates[0].content && result.candidates[0].content.parts &&
                     result.candidates[0].content.parts.length > 0) {
                     const text = result.candidates[0].content.parts[0].text;
-                    descriptionText.textContent = text;
+                    analysisText.textContent = text;
                 } else {
-                    descriptionText.textContent = translations[currentLanguage].msgDescriptionError;
+                    analysisText.textContent = translations[currentLanguage].msgAnalysisError;
                     console.error('Gemini API response structure unexpected:', result);
                 }
             } catch (error) {
-                descriptionText.textContent = translations[currentLanguage].msgDescriptionError;
+                analysisText.textContent = translations[currentLanguage].msgAnalysisError;
                 console.error('Error calling Gemini API:', error);
             } finally {
-                descriptionLoading.classList.add('hidden');
-                generateDescriptionButton.disabled = false; // Re-enable button
+                analysisLoading.classList.add('hidden');
+                generateSalesAnalysisButton.disabled = false;
+            }
+        }
+
+        function updateReports() {
+            calculateFinancialSummary();
+            renderLowStockProducts();
+            // Sales analysis is generated on button click, not on every report update
+        }
+
+        // --- Browser Notification Functions ---
+        function requestNotificationPermission() {
+            // Check if notifications are supported by the browser
+            if (!("Notification" in window)) {
+                showMessage(saleMessageBox, 'msgNotificationNotSupported', true);
+                return;
+            }
+
+            // Request permission
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    showMessage(saleMessageBox, 'msgNotificationGranted');
+                } else if (permission === "denied") {
+                    showMessage(saleMessageBox, 'msgNotificationDenied', true);
+                } else { // 'default'
+                    showMessage(saleMessageBox, 'msgNotificationBlocked', true);
+                }
+            });
+        }
+
+        function sendSaleNotification(saleDetails) {
+            // Check if permission is granted before sending notification
+            if (Notification.permission === "granted") {
+                const title = translations[currentLanguage].notificationTitle;
+                let body = translations[currentLanguage].notificationBody;
+
+                // Replace placeholders in the body
+                body = body.replace('{productName}', saleDetails.productName);
+                body = body.replace('{soldQuantity}', saleDetails.soldQuantity);
+                body = body.replace('{totalSaleAmount}', saleDetails.totalSaleAmount.toFixed(2));
+                body = body.replace('{profit}', saleDetails.profit.toFixed(2));
+
+                new Notification(title, { body: body });
             }
         }
 
@@ -826,19 +1195,38 @@
         purchaseTab.addEventListener('click', () => {
             purchaseTab.classList.add('active');
             saleTab.classList.remove('active');
+            reportsTab.classList.remove('active'); // Deactivate reports tab
             purchaseContent.classList.add('active');
             saleContent.classList.remove('active');
+            reportsContent.classList.remove('active'); // Hide reports content
         });
 
         saleTab.addEventListener('click', () => {
             saleTab.classList.add('active');
             purchaseTab.classList.remove('active');
+            reportsTab.classList.remove('active'); // Deactivate reports tab
             saleContent.classList.add('active');
             purchaseContent.classList.remove('active');
+            reportsContent.classList.remove('active'); // Hide reports content
             updateStockDropdown(); // Update dropdown when switching to sale tab
             productDescriptionOutput.classList.add('hidden'); // Hide description output when switching tabs
             descriptionText.textContent = ''; // Clear previous description
+            actualPurchasePricePerUnitInput.value = ''; // Clear actual purchase price per unit input on tab switch
+            updateSaleCalculationsDisplay(); // Initialize live calculation display
         });
+
+        reportsTab.addEventListener('click', () => {
+            reportsTab.classList.add('active');
+            purchaseTab.classList.remove('active');
+            saleTab.classList.remove('active');
+            reportsContent.classList.add('active');
+            purchaseContent.classList.remove('active');
+            saleContent.classList.remove('active');
+            updateReports(); // Update reports when switching to reports tab
+            salesAnalysisOutput.classList.add('hidden'); // Hide analysis output when switching tabs
+            analysisText.textContent = ''; // Clear previous analysis
+        });
+
 
         // Language selector change
         languageSelector.addEventListener('change', (e) => {
@@ -847,6 +1235,8 @@
             applyTranslations(); // Apply new translations
             renderPurchaseHistory(); // Re-render purchase table to update button texts
             updateStockDropdown(); // Re-render dropdown with new language text
+            updateReports(); // Update reports with new language text
+            updateSaleCalculationsDisplay(); // Update live sale calculations display with new language
         });
 
         // Dark Mode Toggle
@@ -906,6 +1296,8 @@
             saveData(); // Save data to localStorage
             renderPurchaseHistory(); // Update table
             updateStockDropdown(); // Update sale dropdown
+            updateReports(); // Update reports after data change
+            updateSaleCalculationsDisplay(); // Update live calculation display
 
             // Clear form
             purchaseForm.reset();
@@ -928,74 +1320,223 @@
         saleForm.addEventListener('submit', (e) => {
             e.preventDefault(); // Prevent default form submission
 
-            const saleProductName = saleProductNameSelect.value.trim().toLowerCase(); // Use lowercase for stock lookup
+            const saleProductName = saleProductNameInput.value.trim().toLowerCase(); // Use saleProductNameInput
             const soldQuantity = parseInt(soldQuantityInput.value);
             const salePrice = parseFloat(salePriceInput.value);
+            const actualPurchasePricePerUnit = parseFloat(actualPurchasePricePerUnitInput.value); // Get actual purchase cost PER UNIT from input
 
             // Input validation
-            if (!saleProductName || isNaN(soldQuantity) || soldQuantity <= 0 || isNaN(salePrice) || salePrice <= 0) {
+            if (!saleProductName || isNaN(soldQuantity) || soldQuantity <= 0 || isNaN(salePrice) || salePrice <= 0 || isNaN(actualPurchasePricePerUnit) || actualPurchasePricePerUnit < 0) {
                 showMessage(saleMessageBox, 'msgSaleInvalidInput', true);
                 return;
             }
 
-            // Check if product exists in stock
-            if (!stock[saleProductName] || stock[saleProductName].quantity === 0) {
-                showMessage(saleMessageBox, 'msgProductNotInStock', true);
-                return;
-            }
-
-            // Check if enough quantity is available
-            if (stock[saleProductName].quantity < soldQuantity) {
+            // Check if product exists in stock (only for quantity check)
+            if (stock[saleProductName] && stock[saleProductName].quantity < soldQuantity) {
                 showMessage(saleMessageBox, 'msgNotEnoughStock', true, `${stock[saleProductName].quantity}`);
                 return;
             }
 
             const totalSaleAmount = soldQuantity * salePrice;
-            const purchasePricePerUnit = stock[saleProductName].avgPurchasePrice;
-            const actualPurchaseCostForSoldQty = soldQuantity * purchasePricePerUnit; // Calculate actual purchase cost for sold quantity
-            const profit = totalSaleAmount - actualPurchaseCostForSoldQty; // Profit = Total Sale - Actual Purchase Cost
+            const actualPurchaseCostForSoldQty = soldQuantity * actualPurchasePricePerUnit; // Calculate total actual purchase cost
+            const profit = totalSaleAmount - actualPurchaseCostForSoldQty; // Profit based on entered actual purchase cost
 
             // Add to sale history
-            saleHistory.push({
+            const newSaleEntry = {
                 productName: saleProductName.charAt(0).toUpperCase() + saleProductName.slice(1), // Capitalize first letter for display
                 soldQuantity: soldQuantity,
                 salePrice: salePrice,
-                actualPurchaseCostForSoldQty: actualPurchaseCostForSoldQty, // Store actual purchase cost
+                actualPurchaseCostForSoldQty: actualPurchaseCostForSoldQty, // Store calculated total actual purchase cost
                 totalSaleAmount: totalSaleAmount,
                 profit: profit
-            });
+            };
+            saleHistory.push(newSaleEntry);
 
-            // Update stock
-            stock[saleProductName].quantity -= soldQuantity;
+            // Send browser notification
+            sendSaleNotification(newSaleEntry);
+
+            // Update stock only if the product was actually in stock
+            if (stock[saleProductName]) {
+                stock[saleProductName].quantity -= soldQuantity;
+            } else {
+                // If a new product is sold that wasn't in purchase history, add it to stock with 0 quantity
+                // This ensures it appears in the datalist for future sales/purchases, but doesn't affect stock count.
+                // You might want to adjust this logic based on how you handle sales of unpurchased items.
+                stock[saleProductName] = { quantity: 0, avgPurchasePrice: 0 };
+            }
+
 
             saveData(); // Save data to localStorage
             renderSaleHistory(); // Update table
             updateStockDropdown(); // Update sale dropdown (to reflect reduced stock)
+            updateReports(); // Update reports after data change
             showMessage(saleMessageBox, 'msgSaleSuccess');
 
             // Clear form
             saleForm.reset();
-            saleProductNameSelect.value = ''; // Reset dropdown
+            saleProductNameInput.value = ''; // Reset input
             productDescriptionOutput.classList.add('hidden'); // Hide description output after sale
             descriptionText.textContent = ''; // Clear previous description
+            actualPurchasePricePerUnitInput.value = ''; // Clear actual purchase price per unit input
+            updateSaleCalculationsDisplay(); // Reset live calculation display
         });
-
-        // Event listener for the new Gemini API feature button
-        generateDescriptionButton.addEventListener('click', generateProductDescription);
-
 
         // --- Initial Load ---
         window.onload = () => {
+            // Function definitions moved inside window.onload to ensure scope and availability
+            // --- Gemini API Integration: Product Description Generator ---
+            async function generateProductDescription() {
+                const selectedProduct = saleProductNameInput.value.trim().toLowerCase();
+
+                if (!selectedProduct) {
+                    showMessage(saleMessageBox, 'msgSelectProductForDescription', true);
+                    return;
+                }
+
+                const productData = stock[selectedProduct];
+                const avgPrice = productData ? productData.avgPurchasePrice.toFixed(2) : 'N/A';
+
+                // Show loading indicator
+                productDescriptionOutput.classList.remove('hidden');
+                descriptionText.textContent = '';
+                descriptionLoading.classList.remove('hidden');
+                generateDescriptionButton.disabled = true; // Disable button during generation
+
+                const productNameDisplay = selectedProduct.charAt(0).toUpperCase() + selectedProduct.slice(1);
+                let prompt = `Write a short, engaging product description (around 2-3 sentences) for a stationery item named '${productNameDisplay}'.`;
+
+                if (productData && productData.avgPurchasePrice !== undefined) {
+                    prompt += ` Its average purchase cost is ₹${avgPrice}.`;
+                }
+                prompt += ` Focus on its utility, quality, and appeal to customers.`;
+
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Canvas will automatically provide the API key at runtime
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        descriptionText.textContent = text;
+                    } else {
+                        descriptionText.textContent = translations[currentLanguage].msgDescriptionError;
+                        console.error('Gemini API response structure unexpected:', result);
+                    }
+                } catch (error) {
+                    descriptionText.textContent = translations[currentLanguage].msgDescriptionError;
+                    console.error('Error calling Gemini API:', error);
+                } finally {
+                    descriptionLoading.classList.add('hidden');
+                    generateDescriptionButton.disabled = false; // Re-enable button
+                }
+            }
+
+            // --- Reports & Insights Functions (Sales Analysis) ---
+            async function generateSalesPerformanceAnalysis() {
+                if (saleHistory.length === 0) {
+                    showMessage(reportsMessageBox, 'msgNoSaleDataForAnalysis', true);
+                    return;
+                }
+
+                // Show loading indicator
+                salesAnalysisOutput.classList.remove('hidden');
+                analysisText.textContent = '';
+                analysisLoading.classList.remove('hidden');
+                generateSalesAnalysisButton.disabled = true;
+
+                const salesDataForPrompt = saleHistory.map(item => ({
+                    product: item.productName,
+                    quantity: item.soldQuantity,
+                    salePrice: item.salePrice,
+                    profit: item.profit
+                }));
+
+                const prompt = `Analyze the following sales data for a stationery shop. Identify the top 3 best-selling products by quantity, the top 3 most profitable products, and any 3 slowest-moving products (if applicable, based on quantity). Also, provide a brief, general insight or recommendation based on this data. Format the output clearly with headings for each section (e.g., "Top Selling Products:", "Most Profitable Products:", "Slowest Moving Products:", "General Insights:").\n\nSales Data: ${JSON.stringify(salesDataForPrompt)}`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Canvas will automatically provide the API key at runtime
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        analysisText.textContent = text;
+                    } else {
+                        analysisText.textContent = translations[currentLanguage].msgAnalysisError;
+                        console.error('Gemini API response structure unexpected:', result);
+                    }
+                } catch (error) {
+                    analysisText.textContent = translations[currentLanguage].msgAnalysisError;
+                    console.error('Error calling Gemini API:', error);
+                } finally {
+                    analysisLoading.classList.add('hidden');
+                    generateSalesAnalysisButton.disabled = false;
+                }
+            }
+            // End of function definitions moved inside window.onload
+
             loadData(); // Load data when the page loads
             languageSelector.value = currentLanguage; // Set the selector to the loaded language
             applyTranslations(); // Apply translations based on loaded language
             renderPurchaseHistory(); // Render purchase history
             renderSaleHistory(); // Render sale history
             updateStockDropdown(); // Populate sale product dropdown
+            updateReports(); // Initial render of reports
+            updateSaleCalculationsDisplay(); // Initial call to display calculations
+
             // Set default date to today for convenience
             const today = new Date().toISOString().split('T')[0];
             purchaseDateInput.value = today;
+
+            // Event listeners for Gemini API features (attached here after functions are defined)
+            generateDescriptionButton.addEventListener('click', generateProductDescription);
+            generateSalesAnalysisButton.addEventListener('click', generateSalesPerformanceAnalysis);
+
+            // Event listeners for live sale calculation display
+            saleProductNameInput.addEventListener('input', updateSaleCalculationsDisplay);
+            soldQuantityInput.addEventListener('input', updateSaleCalculationsDisplay);
+            salePriceInput.addEventListener('input', updateSaleCalculationsDisplay);
+            actualPurchasePricePerUnitInput.addEventListener('input', updateSaleCalculationsDisplay); // Listen to changes in the new input
+
+            // Event listener for notification permission button
+            requestNotificationPermissionButton.addEventListener('click', requestNotificationPermission);
         };
     </script>
 </body>
 </html>
+
